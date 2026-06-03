@@ -26,18 +26,10 @@ dec265 -c video.265                # verify frame hashes
 
 Run `dec265 -h` for the full option list.
 
-## Installation
-
-Install with [unpin](https://github.com/unpins/unpin):
+To install it onto your PATH:
 
 ```bash
-unpin dec265
-```
-
-Or run without installing:
-
-```bash
-unpin run dec265 -- -d video.265
+unpin install dec265
 ```
 
 ## Build locally
