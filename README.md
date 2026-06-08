@@ -1,7 +1,6 @@
 # dec265
 
-Standalone build of [dec265](https://github.com/strukturag/libde265) — the
-[libde265](https://github.com/strukturag/libde265) H.265/HEVC decoder CLI.
+[dec265](https://github.com/strukturag/libde265) — the [libde265](https://github.com/strukturag/libde265) H.265/HEVC decoder CLI. A single self-contained binary, built natively for Linux, macOS, and Windows.
 
 [![CI](https://github.com/unpins/dec265/actions/workflows/dec265.yml/badge.svg)](https://github.com/unpins/dec265/actions)
 ![Linux](https://img.shields.io/badge/Linux-✓-success?logo=linux&logoColor=white)
@@ -13,7 +12,7 @@ dumps stream headers, checks frame hashes and measures PSNR against a reference 
 the decoder library that libheif/FFmpeg/GStreamer use to read HEIC, as a single
 self-contained binary.
 
-Part of the [unpins](https://unpins.org) project — native single-binary builds with no third-party runtime dependencies.
+Part of the [unpins](https://unpins.org) catalog; install it with [`unpin`](https://github.com/unpins/unpin): `unpin install dec265`.
 
 ## Usage
 
