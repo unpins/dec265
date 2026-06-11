@@ -1,5 +1,5 @@
 {
-  description = "Standalone build of dec265 (libde265 H.265/HEVC decoder)";
+  description = "dec265 (libde265 H.265/HEVC decoder) as a single self-contained binary";
 
   nixConfig = {
     extra-substituters = [ "https://unpins.cachix.org" ];
