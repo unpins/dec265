@@ -79,6 +79,15 @@
     ulib.mkStandaloneFlake {
       inherit self;
       name = "dec265";
+
+      # Build via the unpin-llvm engine + emit a bitcode multicall module.
+      engine = "unpin-llvm";
+      multicall = {
+        programs = [{ name = "dec265"; }];
+      };
+      # Upstream nixpkgs attr is `libde265` (CLI is `dec265`); pkgsAttr names it
+      # so the engine's stdenv override targets the attr `build` actually uses.
+      pkgsAttr = "libde265";
       embedMan = false;
       # dec265 has no --version; `-h` prints the ` dec265  vX.Y.Z` banner + usage
       # and exits 0 (other recognized flags exit 5 when no input file follows).
