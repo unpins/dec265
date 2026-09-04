@@ -37,15 +37,17 @@
 
       # Build dec265 from the static package set for the target (pkgsStatic or
       # mingwStaticCross). libde265 is C++ (a std::thread worker pool), so the
-      # toolchain runtime needs folding in: on mingw `-static` pulls
-      # libstdc++/libgcc/libwinpthread into the .exe (only system DLLs remain);
-      # on darwin the link would import /usr/lib/libc++.1.dylib, which the unpins
-      # allowlist rejects, so -search_paths_first + a static-libc++ shim fold it
-      # in (the same recipe fpcalc — also C++ — uses).
+      # toolchain runtime needs folding in. On darwin the link would import
+      # /usr/lib/libc++.1.dylib, which the unpins allowlist rejects, so
+      # -search_paths_first + a static-libc++ shim fold it in (the same recipe
+      # fpcalc — also C++ — uses). Windows needs nothing: it comes off the
+      # engine, whose libc++ is static and whose mingw scope has no runtime DLL
+      # to link against. (It used to pass `-static` here for the mingw-gcc
+      # libstdc++/libgcc/libwinpthread; dropping it leaves the `.exe`
+      # byte-identical.)
       mk = sp:
         let
           host = sp.stdenv.hostPlatform;
-          isWindows = host.isWindows or false;
           isDarwin = host.isDarwin or false;
         in
         sp.libde265.overrideAttrs (old: {
@@ -62,7 +64,6 @@
             "-DENABLE_ENCODER=OFF"
             "-DENABLE_SHERLOCK265=OFF"
           ]
-            ++ (if isWindows then [ "-DCMAKE_EXE_LINKER_FLAGS=-static" ] else [ ])
             ++ (if isDarwin then [ "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-search_paths_first" ] else [ ]);
           preConfigure = (old.preConfigure or "") + (if isDarwin then ''
             # Expose static libc++/libc++abi as libc++.a/libstdc++.a/libc++abi.a
@@ -83,7 +84,10 @@
       # Build via the unpin-llvm engine + emit a bitcode multicall module.
       engine = "unpin-llvm";
       multicall = {
+        # The `.exe` on the engine too, not the nixpkgs mingw-gcc cross.
+        windows = true;
         programs = [{ name = "dec265"; }];
+        requires.cxx = true;
       };
       # Upstream nixpkgs attr is `libde265` (CLI is `dec265`); pkgsAttr names it
       # so the engine's stdenv override targets the attr `build` actually uses.
