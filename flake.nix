@@ -52,6 +52,37 @@
         in
         sp.libde265.overrideAttrs (old: {
           pname = "dec265";
+          # `-o -` writes the frames to stdout and a `-` input file reads the
+          # bitstream from stdin, and Windows opens both in text mode. Measured
+          # on Windows 10 against Linux with a five-frame clip:
+          #
+          #   -o -        30736 bytes instead of 30720 — one extra byte for
+          #               each of the 16 line feeds in the picture data.
+          #   -o f.yuv -  6144 bytes instead of 30720: ONE frame of five. The
+          #               .265 stream holds three 0x1A bytes, and a text-mode
+          #               read stops at the first one. It printed a stream
+          #               warning and exited 0, so four fifths of the video
+          #               went missing with a success status.
+          #
+          # Named files were always right, they open with "wb"/"rb". Upstream
+          # 1.0.18 calls `_setmode` nowhere.
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace dec265/dec265.cc \
+              --replace-fail '#include "de265.h"' '#ifdef _WIN32
+            #include <fcntl.h>
+            #include <io.h>
+            #endif
+
+            #include "de265.h"' \
+              --replace-fail 'fh = stdout;' 'fh = stdout;
+            #ifdef _WIN32
+                    _setmode(_fileno(stdout), _O_BINARY);
+            #endif' \
+              --replace-fail 'fh = stdin;' 'fh = stdin;
+            #ifdef _WIN32
+                _setmode(_fileno(stdin), _O_BINARY);
+            #endif'
+          '';
           meta = (old.meta or { }) // {
             platforms = sp.lib.platforms.all;
             broken = false;
@@ -86,7 +117,11 @@
       multicall = {
         # The `.exe` on the engine too, not the nixpkgs mingw-gcc cross.
         windows = true;
-        programs = [{ name = "dec265"; }];
+        # libde265 ships no man page, which is also why `embedMan` is
+        # false below. Declared rather than left blank; the CI sweep does
+        # not read it yet for a single-program package, but the waiver is
+        # then already true when it does.
+        programs = [{ name = "dec265"; noMan = true; }];
         requires.cxx = true;
       };
       # Upstream nixpkgs attr is `libde265` (CLI is `dec265`); pkgsAttr names it

@@ -16,14 +16,18 @@ Part of the [unpins](https://unpins.org) catalog; install it with [`unpin`](http
 
 ## Usage
 
+Run the `dec265` program with [unpin](https://github.com/unpins/unpin):
+
 ```bash
-dec265 -o out.yuv video.265        # decode a raw bitstream to YUV
-dec265 -n -o out.yuv stream.bin    # input is length-prefixed NAL units
-dec265 -d video.265                # dump headers only
-dec265 -c video.265                # verify frame hashes
+unpin dec265 -o out.yuv video.265        # decode a raw bitstream to YUV
+unpin dec265 -n -o out.yuv stream.bin    # input is length-prefixed NAL units
+unpin dec265 -d video.265                # dump headers only
+unpin dec265 -c video.265                # verify frame hashes
+unpin dec265 -o - video.265 | ...        # `-` is standard output; as an
+unpin dec265 -o out.yuv -   < video.265  # input file it is standard input
 ```
 
-Run `dec265 -h` for the full option list.
+Run `unpin dec265 -h` for the full option list.
 
 To install it onto your PATH:
 
@@ -61,8 +65,8 @@ The [Releases](https://github.com/unpins/dec265/releases) page has standalone bi
   as a static archive (no companion `.so`/`.dylib`) and defines
   `LIBDE265_STATIC_BUILD`, so the API header isn't decorated with
   `__declspec(dllimport)` on Windows.
-- **Windows:** `mingw` cross, single `.exe`, no companion DLLs — the C++/thread
-  runtime (libstdc++/libgcc/libwinpthread) is folded in statically.
+- **Windows:** a single `.exe`, no companion DLLs. The C++ and thread runtime
+  is folded in statically.
 - **macOS:** the static `libc++` is folded in so the binary links only
   `libSystem`, never `/usr/lib/libc++.1.dylib`.
 - No man page upstream, so none is embedded.

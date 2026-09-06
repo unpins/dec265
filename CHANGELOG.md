@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Reading a bitstream from standard input no longer loses most of the video on
+  Windows. Windows opens standard input in text mode, and a text-mode read
+  stops at the first 0x1A byte — a byte that occurs freely in a compressed
+  stream. Measured on Windows 10: a five-frame clip decoded from standard input
+  produced **one** frame, printed a stream warning, and exited 0. Four fifths of
+  the video went missing with a success status.
+
+- Writing frames to standard output (`-o -`) no longer corrupts them on
+  Windows, for the same reason in the other direction: every line-feed byte in
+  the picture data was written as carriage-return plus line-feed, so the same
+  clip came out as 30736 bytes instead of 30720.
+
+  Both paths now produce output byte-identical to Linux and macOS. Named input
+  and output files were never affected.
+
 ### Changed
 
 - The Windows binary is now built by the same compiler as the Linux and macOS
