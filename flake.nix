@@ -131,7 +131,7 @@
       # dec265 has no --version; `-h` prints the ` dec265  vX.Y.Z` banner + usage
       # and exits 0 (other recognized flags exit 5 when no input file follows).
       smoke = [ "-h" ];
-      smokePattern = "dec265  v1\\.0";
+      smokePattern = "dec265  v[0-9]+\\.[0-9]+";
       build = pkgs: mk pkgs.pkgsStatic;
       windowsBuild = pkgs: mk (ulib.mingwStaticCross pkgs);
     };
