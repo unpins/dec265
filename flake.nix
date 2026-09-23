@@ -96,16 +96,21 @@
             "-DENABLE_SHERLOCK265=OFF"
           ]
             ++ (if isDarwin then [ "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-search_paths_first" ] else [ ]);
-          preConfigure = (old.preConfigure or "") + (if isDarwin then ''
-            # Expose static libc++/libc++abi as libc++.a/libstdc++.a/libc++abi.a
-            # ahead of the dylib dirs so dec265 folds libc++ in instead of
-            # importing /usr/lib/libc++.1.dylib (same shim fpcalc uses).
-            mkdir -p "$TMPDIR/cxx-static"
-            ln -sf ${sp.libcxx}/lib/libc++.a    "$TMPDIR/cxx-static/libc++.a"
-            ln -sf ${sp.libcxx}/lib/libc++.a    "$TMPDIR/cxx-static/libstdc++.a"
-            ln -sf ${sp.libcxx}/lib/libc++abi.a "$TMPDIR/cxx-static/libc++abi.a"
-            export NIX_LDFLAGS="-L$TMPDIR/cxx-static $NIX_LDFLAGS"
-          '' else "");
+          # Kept, though it now adds nothing: dropping the attribute outright
+          # removes an (empty) preConfigure from the linux and windows drvs and
+          # moves them, and this change is meant to touch darwin only.
+          preConfigure = (old.preConfigure or "");
+          # No libc++ shim on darwin. It used to expose nixpkgs' static
+          # libc++.a/libc++abi.a ahead of the dylib dirs so the binary folded
+          # libc++ in instead of importing /usr/lib/libc++.1.dylib. Under the
+          # engine that archive is the WRONG one to hand over: `libcxx` is
+          # excluded from the engine's stdenv swap (measured — the engine
+          # scope's libcxx is not engine-built either; swapping it would be
+          # circular), so the engine's clang++ would compile against the libc++
+          # headers in its own sysroot and then link a differently-built
+          # archive. It links its own, statically. The darwin allow-list gate
+          # fails the build if that ever regresses to the system dylib, so the
+          # removal cannot go unnoticed.
         });
     in
     ulib.mkStandaloneFlake {
