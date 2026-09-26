@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.2-1] - 2026-09-26
+
 ### Fixed
 
 - Reading a bitstream from standard input no longer loses most of the video on
