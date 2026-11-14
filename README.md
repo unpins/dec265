@@ -65,8 +65,7 @@ The [Releases](https://github.com/unpins/dec265/releases) page has standalone bi
   as a static archive (no companion `.so`/`.dylib`) and defines
   `LIBDE265_STATIC_BUILD`, so the API header isn't decorated with
   `__declspec(dllimport)` on Windows.
-- **Windows:** a single `.exe`, no companion DLLs. The C++ and thread runtime
-  is folded in statically.
+- **Windows:** built with mingw-w64.
 - **macOS:** the static `libc++` is folded in so the binary links only
   `libSystem`, never `/usr/lib/libc++.1.dylib`.
 - No man page upstream, so none is embedded.
