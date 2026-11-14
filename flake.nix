@@ -95,10 +95,6 @@
             "-DENABLE_SHERLOCK265=OFF"
           ]
             ++ (if isDarwin then [ "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-search_paths_first" ] else [ ]);
-          # Kept, though it now adds nothing: dropping the attribute outright
-          # removes an (empty) preConfigure from the linux and windows drvs and
-          # moves them, and this change is meant to touch darwin only.
-          preConfigure = (old.preConfigure or "");
           # No libc++ shim on darwin. It used to expose nixpkgs' static
           # libc++.a/libc++abi.a ahead of the dylib dirs so the binary folded
           # libc++ in instead of importing /usr/lib/libc++.1.dylib. Under the
