@@ -46,10 +46,6 @@
       # libstdc++/libgcc/libwinpthread; dropping it leaves the `.exe`
       # byte-identical.)
       mk = sp:
-        let
-          host = sp.stdenv.hostPlatform;
-          isDarwin = host.isDarwin or false;
-        in
         sp.libde265.overrideAttrs (old: {
           pname = "dec265";
           # Binary stdin/stdout on Windows; the measured why is in the patch
@@ -65,8 +61,7 @@
             "-DENABLE_SDL=OFF"          # headless: no SDL2 preview/dep
             "-DENABLE_ENCODER=OFF"
             "-DENABLE_SHERLOCK265=OFF"
-          ]
-            ++ (if isDarwin then [ "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-search_paths_first" ] else [ ]);
+          ];
           # No libc++ shim on darwin. It used to expose nixpkgs' static
           # libc++.a/libc++abi.a ahead of the dylib dirs so the binary folded
           # libc++ in instead of importing /usr/lib/libc++.1.dylib. Under the
