@@ -1,0 +1,50 @@
+dec265: binary stdin/stdout on Windows.
+
+`-o -` writes the frames to stdout and a `-` input file reads the bitstream
+from stdin, and Windows opens both in text mode. Measured on Windows 10
+against Linux with a five-frame clip:
+
+  -o -        30736 bytes instead of 30720: one extra byte for each of the 16
+              line feeds in the picture data.
+  -o f.yuv -  6144 bytes instead of 30720: ONE frame of five. The .265 stream
+              holds three 0x1A bytes, and a text-mode read stops at the first
+              one. It printed a stream warning and exited 0, so four fifths of
+              the video went missing with a success status.
+
+Named files were always right, they open with "wb"/"rb". Upstream calls
+`_setmode` nowhere.
+
+--- a/dec265/dec265.cc
++++ b/dec265/dec265.cc
+@@ -26,6 +26,11 @@
+ 
+ #define DO_MEMORY_LOGGING 0
+ 
++#ifdef _WIN32
++#include <fcntl.h>
++#include <io.h>
++#endif
++
+ #include "de265.h"
+ #include <stdexcept>
+ #include <iostream>
+@@ -124,6 +129,9 @@
+   if (fh==NULL) {
+     if (strcmp(output_filename, "-") == 0) {
+       fh = stdout;
++#ifdef _WIN32
++        _setmode(_fileno(stdout), _O_BINARY);
++#endif
+     } else {
+       fh = fopen(output_filename, "wb");
+     }
+@@ -723,6 +731,9 @@
+   FILE* fh;
+   if (strcmp(argv[optind],"-")==0) {
+     fh = stdin;
++#ifdef _WIN32
++    _setmode(_fileno(stdin), _O_BINARY);
++#endif
+   }
+   else {
+     fh = fopen(argv[optind], "rb");
