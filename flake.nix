@@ -85,7 +85,6 @@
           '';
           meta = (old.meta or { }) // {
             platforms = sp.lib.platforms.all;
-            broken = false;
             mainProgram = "dec265";
           };
           cmakeFlags = (old.cmakeFlags or [ ])
