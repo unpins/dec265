@@ -15,10 +15,10 @@
   # the tool (`dec265`), like xmllint/fpcalc — CI resolves result/bin/<name>.
   #
   # Single binary, no multicall: the canonical bin is already `dec265`. The
-  # other in-tree apps stay off — enc265 (ENABLE_ENCODER) and sherlock265 (a Qt
-  # visual inspector) are default-OFF, and we drop SDL so dec265 builds without
-  # a display dep (it writes YUV; the optional SDL preview is irrelevant for a
-  # headless single-binary tool and would otherwise pull SDL2 into the closure).
+  # other in-tree apps stay off, as upstream and nixpkgs ship them: enc265
+  # (ENABLE_ENCODER, off by default upstream, not installed by nixpkgs) and
+  # sherlock265 (a Qt visual inspector). SDL is off too: dec265 writes YUV, and
+  # the optional SDL preview would pull SDL2 into a headless binary.
   #
   # libde265 is portable CMake C++ with no external library deps, so the static
   # build is tiny and crosses cleanly. BUILD_SHARED_LIBS=OFF is the load-bearing
@@ -36,15 +36,9 @@
       ulib = unpins-lib.lib;
 
       # Build dec265 from the static package set for the target (pkgsStatic or
-      # mingwStaticCross). libde265 is C++ (a std::thread worker pool), so the
-      # toolchain runtime needs folding in. On darwin the link would import
-      # /usr/lib/libc++.1.dylib, which the unpins allowlist rejects, so
-      # -search_paths_first + a static-libc++ shim fold it in (the same recipe
-      # fpcalc — also C++ — uses). Windows needs nothing: it comes off the
-      # engine, whose libc++ is static and whose mingw scope has no runtime DLL
-      # to link against. (It used to pass `-static` here for the mingw-gcc
-      # libstdc++/libgcc/libwinpthread; dropping it leaves the `.exe`
-      # byte-identical.)
+      # mingwStaticCross). libde265 is C++ (a std::thread worker pool); the
+      # engine links its own libc++ statically on every target, darwin
+      # included, so there is no shim and no system libc++ dylib.
       mk = sp:
         sp.libde265.overrideAttrs (old: {
           pname = "dec265";
