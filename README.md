@@ -58,14 +58,14 @@ The [Releases](https://github.com/unpins/dec265/releases) page has standalone bi
 
 - Single upstream CLI (`dec265`); the `libde265` library is not user-facing, so
   it is linked in statically rather than shipped. The package is named after the
-  tool. The other in-tree apps stay off — `enc265` and the Qt `sherlock265`
-  inspector are upstream-default-OFF, and SDL preview support is dropped so the
-  decoder builds headless with no SDL2 in the closure.
+  tool.
+- **Not included:** `enc265` (upstream builds it only on request and nixpkgs
+  does not install it; turning it on also exports the library's internal
+  symbols), the Qt `sherlock265` inspector, and the SDL preview window (`dec265`
+  writes YUV/Y4M).
 - `BUILD_SHARED_LIBS=OFF` is load-bearing: it folds `libde265` into the binary
   as a static archive (no companion `.so`/`.dylib`) and defines
   `LIBDE265_STATIC_BUILD`, so the API header isn't decorated with
   `__declspec(dllimport)` on Windows.
 - **Windows:** built with mingw-w64.
-- **macOS:** the static `libc++` is folded in so the binary links only
-  `libSystem`, never `/usr/lib/libc++.1.dylib`.
 - No man page upstream, so none is embedded.
